@@ -152,7 +152,7 @@ function addOrUpdateEvent($event) {
 	$sql = "SELECT objects.* FROM objects, wires WHERE objects.name2='$spektrix_id' AND wires.toid=objects.id AND objects.active=1 AND wires.active=1";
 	$res = $db->query($sql)->fetch_assoc();
 
-	if (sizeof($res) > 0) {
+	if ($res != null && sizeof($res) > 0) {
 		// update dates
 		$processed = array(
 			"begin" => date($oo::MYSQL_DATE_FMT, strtotime($event['begin_date'])), // begin date
@@ -229,7 +229,7 @@ function addOrUpdateInstance($instance) {
 	$sql = "SELECT event_id, event_instance_id FROM spektrix WHERE event_id='$eventId' AND event_instance_id='$instanceId'";
 
 	$res = $db->query($sql)->fetch_assoc();
-  if (sizeof($res) > 0) {
+  if ($res != null && sizeof($res) > 0) {
     // update
     $sql = "UPDATE spektrix SET ";
     $sql .= "venue='" . addslashes($instance["venue"]) . "', ";
