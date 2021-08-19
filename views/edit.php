@@ -171,7 +171,7 @@ if ($rr->action != "update" && $uu->id)
 		> -->
 			<div class="form">
 				<script>
-
+				var default_editor_mode = '<?= $default_editor_mode; ?>';
 				function link(name) {
 						var linkURL = prompt('Enter a URL:', 'http://');
 						if (linkURL === null || linkURL === "") {
@@ -247,6 +247,7 @@ if ($rr->action != "update" && $uu->id)
 					} else {
 						var html = textarea.value;
 						editable.innerHTML = html;    // update editable
+						textarea.value = editable.innerHTML;
 					}
 					// console.log([name, editable.style.display, textarea.style.display]);
 				}
@@ -285,7 +286,7 @@ if ($rr->action != "update" && $uu->id)
 					editable.innerHTML = html;    // update editable
 				}
 
-				function sethtml(name) {
+				function sethtml(name, editorMode = 'regular') {
 					var bold = document.getElementById(name + '-bold');
 					var italic = document.getElementById(name + '-italic');
 					var link = document.getElementById(name + '-link');
@@ -318,10 +319,11 @@ if ($rr->action != "update" && $uu->id)
 
 					var html = editable.innerHTML;
 					textarea.value = pretty(html);    // update textarea for form submit
-					window.scrollBy(0, textarea.getBoundingClientRect().top); // scroll to the top of the textarea
+					if(editorMode == 'regular')
+						window.scrollBy(0, textarea.getBoundingClientRect().top); // scroll to the top of the textarea
 				}
 
-				function resetViews(name) {
+				function resetViews(name, editorMode = 'regular') {
 					commitAll();
 					var names = <?
 						$textnames = [];
@@ -332,11 +334,21 @@ if ($rr->action != "update" && $uu->id)
 						}
 						echo '["' . implode('", "', $textnames) . '"]'
 						?>;
-
-					for (var i = 0; i < names.length; i++) {
-						if (!(name && name === names[i]))
-							showrich(names[i]);
+					
+					if(editorMode == 'regular')
+					{
+						for (var i = 0; i < names.length; i++) {
+							if (!(name && name === names[i]))
+								showrich(names[i]);
 						}
+					}
+					else if(editorMode == 'html')
+					{
+						for (var i = 0; i < names.length; i++) {
+							if (!(name && name === names[i]))
+								sethtml(names[i], default_editor_mode);
+						}
+					}					
 				}
 
 				// pretifies html (barely) by adding two new lines after a </div>
@@ -637,27 +649,27 @@ else
         $num_captions = sizeof($rr->captions);
         if (sizeof($rr->medias) < $num_captions)
             $num_captions = sizeof($rr->medias);
+        for ($i = 0; $i < $num_captions; $i++)
+		{
+			unset($m_arr);
+			$m_id = $rr->medias[$i];
+			$caption = addslashes($rr->captions[$i]);
+			$rank = addslashes($rr->ranks[$i]);
+
+			$m = $mm->get($m_id);
+			if($m["caption"] != $caption)
+				$m_arr["caption"] = "'".$caption."'";
+			if($m["rank"] != $rank)
+				$m_arr["rank"] = "'".$rank."'";
+
+			if($m_arr)
+			{
+				$arr["modified"] = "'".date("Y-m-d H:i:s")."'";
+				$updated = $mm->update($m_id, $m_arr);
+			}
+		}
     }
 
-	for ($i = 0; $i < $num_captions; $i++)
-	{
-		unset($m_arr);
-		$m_id = $rr->medias[$i];
-		$caption = addslashes($rr->captions[$i]);
-		$rank = addslashes($rr->ranks[$i]);
-
-		$m = $mm->get($m_id);
-		if($m["caption"] != $caption)
-			$m_arr["caption"] = "'".$caption."'";
-		if($m["rank"] != $rank)
-			$m_arr["rank"] = "'".$rank."'";
-
-		if($m_arr)
-		{
-			$arr["modified"] = "'".date("Y-m-d H:i:s")."'";
-			$updated = $mm->update($m_id, $m_arr);
-		}
-	}
 	?><div class="self-container"><?
 		// should change this url to reflect updated url
 		$urls = array_slice($uu->urls, 0, count($uu->urls)-1);
