@@ -52,11 +52,10 @@ class Request
 						'wires_toid',
 						'uploads', 'default_editor_mode');
 
-		foreach($vars as $v){
+		foreach($vars as $v)
+		{
 			if(isset($_POST[$v]))
 				$this->$v = $_POST[$v];
-			else
-				$this->$v = 'null';
 		}
 	}
 }
