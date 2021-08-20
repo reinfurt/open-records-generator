@@ -1,0 +1,4 @@
+1. In models/objects.php, children() has different $order. array("objects.rank", "objects.modified DESC", "objects.end", "objects.begin", "objects.name1");
+2. In views/edit.php, there are more fields available (name2, address1, address2, city, state, zip, country, phone).
+3. In views/foot.php, there is a SYNC button.
+4. Has the file views/sync-spektrix.php.
