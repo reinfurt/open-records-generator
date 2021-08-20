@@ -3,16 +3,12 @@
 /*
     use environment variables
     set in server block directive, read via php
-    
     apache:
-
     SetEnv MYSQL_R_DATABASE_URL mysql2://user:pass@host/database
     SetEnv MYSQL_RW_DATABASE_URL mysql2://user:pass@host/database
-
     nginx:
-  
-    fastcgi_param   MYSQL_R_DATABASE_URL mysql2://user:pass@host/database
-    fastcgi_param   MYSQL_RW_DATABASE_URL mysql2://user:pass@host/database
+    fastcgi_param   MYSQL_R_DATABASE_URL mysql2://user:pass@host/database;
+    fastcgi_param   MYSQL_RW_DATABASE_URL mysql2://user:pass@host/database;
 */
 
 // get environment variables
@@ -22,7 +18,8 @@ $host = "//".$_SERVER["HTTP_HOST"]."/";
 $root = $_SERVER["DOCUMENT_ROOT"]."/";
 $admin_path = $host . "open-records-generator/";
 $admin_root = $root . "open-records-generator/";
-$adminURLString = getenv("MYSQL_RW_DATABASE_URL");
+$adminURLString = getenv("MYSQL_FULL_DATABASE_URL");
+$readWriteURLString = getenv("MYSQL_RW_DATABASE_URL");
 $readOnlyURLString = getenv("MYSQL_R_DATABASE_URL");
 $media_path = $host . "media/"; // don't forget to set permissions on this folder
 $media_root = $root . "media/";
@@ -58,15 +55,23 @@ function db_connect($remote_user) {
 	$users = array();
 	$creds = array();
 
-	if ($adminURLString) {
+	if ($adminURLString && $readWriteURLString && $readOnlyURLString) {
 		// IF YOU ARE USING ENVIRONMENTAL VARIABLES (you should)
 		$urlAdmin = parse_url($adminURLString);
 		$host = $urlAdmin["host"];
 		$dbse = substr($urlAdmin["path"], 1);
 
-		$creds['rw']['db_user'] = $urlAdmin["user"];
-		$creds['rw']['db_pass'] = $urlAdmin["pass"];
+        // full access
+        $creds['full']['db_user'] = $urlAdmin["user"];
+        $creds['full']['db_pass'] = $urlAdmin["pass"];
 
+        // read / write access
+        // (can't create / drop tables)
+        $urlReadWrite = parse_url($readWriteURLString);
+		$creds['rw']['db_user'] = $urlReadWrite["user"];
+		$creds['rw']['db_pass'] = $urlReadWrite["pass"];
+
+        // read-only access
 		$urlReadOnly = parse_url($readOnlyURLString);
 		$creds['r']['db_user'] = $urlReadOnly["user"];
 		$creds['r']['db_pass'] = $urlReadOnly["pass"];
@@ -74,20 +79,20 @@ function db_connect($remote_user) {
 	} else {
 		// IF YOU ARE NOT USING ENVIRONMENTAL VARIABLES
 		$host = "localhost";
-		$dbse = "dev_ica_art_local";
+		$dbse = "database_name";
 
 		// full access
-		$creds['full']['db_user'] = "root";
-		$creds['full']['db_pass'] = "f3f4p4ax";
+		$creds['full']['db_user'] = "user_full";
+		$creds['full']['db_pass'] = "pass_full";
 
 		// read / write access
 		// (can't create / drop tables)
-		$creds['rw']['db_user'] = "root";
-		$creds['rw']['db_pass'] = "f3f4p4ax";
+		$creds['rw']['db_user'] = "user_rw";
+		$creds['rw']['db_pass'] = "pass_rw";
 
 		// read-only access
-		$creds['r']['db_user'] = "root";
-		$creds['r']['db_pass'] = "f3f4p4ax";
+		$creds['r']['db_user'] = "user_r";
+		$creds['r']['db_pass'] = "pass_r";
 	}
 
 	// users
