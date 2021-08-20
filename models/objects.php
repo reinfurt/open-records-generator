@@ -53,9 +53,9 @@ class Objects extends Model
 						"wires.active = 1",
 						"wires.toid = objects.id",
 						"objects.active = '1'");
-		// $order 	= array("objects.rank", "objects.begin", "objects.end", "objects.name1");
+		$order 	= array("objects.rank", "objects.begin", "objects.end", "objects.name1");
         /* exception for ICA, applies globally */
-        $order 	= array("objects.rank", "objects.modified DESC", "objects.end", "objects.begin", "objects.name1");
+        // $order 	= array("objects.rank", "objects.modified DESC", "objects.end", "objects.begin", "objects.name1");
     
 		return $this->get_all($fields, $tables, $where, $order);
 	}
@@ -90,14 +90,14 @@ class Objects extends Model
 						"objects.active = '1'",
 						"objects.name1 not like '.%'");
         $order 	= array("objects.rank", "objects.begin", "objects.end", "objects.name1");
-		$res = $this->get_all($fields, $tables, $where, $order, $limit);
+		$res = $this->get_all($fields, $tables, $where, $order);
 		$ids = array();
 		foreach($res as $r)
 			$ids[] = $r['id'];
 
 		return $ids;
 	}
-	
+
     public function siblings($o)
 	{
 		global $db;
@@ -115,6 +115,7 @@ class Objects extends Model
 		while ($obj = $res->fetch_assoc())
 			$fromid_arr[] = $obj['fromid'];
 		$res->close();
+
 		foreach($fromid_arr as $parent_id)
 		{
 			$this_siblings = $this->children_ids($parent_id);
@@ -147,10 +148,13 @@ class Objects extends Model
 							"objects.active = '1'");
             $order 	= array("objects.rank", "objects.begin", "objects.end", "objects.name1");
 			$tmp = $this->get_all($fields, $tables, $where, $order);
-			$fromid = $tmp[0]['id'];
-			if(!$fromid)
-				throw new Exception($i);
-			$objects[] = $fromid;
+			if(!empty($tmp))
+			{
+				$fromid = $tmp[0]['id'];
+				if(!$fromid)
+					throw new Exception($i);
+				$objects[] = $fromid;
+			}
 		}
 		return $objects;
 	}
@@ -355,12 +359,12 @@ class Objects extends Model
 		foreach($top as $t)
 		{
 			$o = $this->get($t);
-			$d = $root+1;
+			$d = $root_index+1;
 			$urls = array($o['url']);
 			$url = implode("/", $urls);			
 			$nav[] = array('depth'=>$d, 'o'=>$o, 'url'=>$url);
 			
-			if($pass && $t == $ids[$root_index])
+			if(!empty($ids) && $pass && isset($ids[$root_index]) && $t == $ids[$root_index])
 			{
 				$pass = false; // short-circuit if statement
 
