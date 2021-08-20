@@ -1,0 +1,2 @@
+1. In views/foot.php, there is a SYNC button.
+2. Has the file views/sync-shopify.php and views/sync-shopify-handler.php.
