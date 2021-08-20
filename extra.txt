@@ -1,0 +1,2 @@
+1. In static/main.css, .editable has an extra css property white-space: pre-line;
+2. 
