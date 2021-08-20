@@ -101,7 +101,8 @@
 		else
 		{
 			try{
-				$buy_id = end($oo->urls_to_ids(array('buy')));
+				$temp = $oo->urls_to_ids(array('buy'));
+				$buy_id = end($temp);
 				$buy_children = $oo->children($buy_id);
 				$existing_product_ids = array();
 				$existing_product_id_to_item = array();
@@ -114,7 +115,8 @@
 					$s_urls[] = $child['url'];
 				}
 				try{
-					$donate_id = end($oo->urls_to_ids(array('donate')));
+					$temp = $oo->urls_to_ids(array('donate'));
+					$donate_id = end($temp);
 					$donate_item = $oo->get($donate_id);
 					$donate_product_id = get_single_tag($donate_item['deck']);
 					$hasDonate = true;
@@ -122,7 +124,8 @@
 				catch(Exception $err)
 				{
 					try{
-						$donate_id = end($oo->urls_to_ids(array('donation')));
+						$temp = $oo->urls_to_ids(array('donation'));
+						$donate_id = end($temp);
 						$donate_item = $oo->get($donate_id);
 						$donate_product_id = get_single_tag($donate_item['deck']);
 						$hasDonate = true;
